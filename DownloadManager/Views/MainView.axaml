@@ -9,13 +9,28 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="DownloadManager.Views.MainView"
         x:CompileBindings="True"
-        x:DataType="viewModels:MainViewModel"
-        Title="DownloadManager">
+        x:DataType="viewModels:MainViewModel">
     <Window.DataTemplates>
         <local:ViewLocator/>
     </Window.DataTemplates>
-    <Panel>
-        <!-- Settings might be added! -->
+    <DockPanel>
+        <Grid Background="Transparent"
+              Name="TitleBarHost"
+              ColumnDefinitions="Auto,*"
+              DockPanel.Dock="Top"
+              MinHeight="30">
+
+            <Image Grid.Column="0" Margin="12 4"
+                   IsHitTestVisible="False"
+                   Source="../Assets/file-download-icon-19.jpg"
+                   Width="18" Height="18"/>
+           
+            <TextBlock Text="{Binding Title}"
+                       FontSize="12"
+                       IsHitTestVisible="False"
+                       VerticalAlignment="Center"
+                       Grid.Column="1"/>
+        </Grid>
         <controls:NavigationView IsBackButtonVisible="False"
                                  IsSettingsVisible="False" 
                                  AlwaysShowHeader="True"
@@ -30,7 +45,6 @@
                                                  Icon="{Binding Icon}"/>
                 </DataTemplate>
             </controls:NavigationView.MenuItemTemplate>
-            
         </controls:NavigationView>
-    </Panel>
+    </DockPanel>
 </controls:CoreWindow>
