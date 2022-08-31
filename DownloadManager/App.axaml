@@ -3,9 +3,7 @@
              xmlns:local="using:DownloadManager"
              x:Class="DownloadManager.App"
              xmlns:sty="using:FluentAvalonia.Styling">
-    <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates>
+    
     <Application.Styles>
         <sty:FluentAvaloniaTheme/>
     </Application.Styles>

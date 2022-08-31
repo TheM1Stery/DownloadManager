@@ -17,7 +17,9 @@ namespace DownloadManager.Views
             var theme = AvaloniaLocator.Current.GetRequiredService<FluentAvaloniaTheme>();
             theme.ForceWin32WindowToTheme(this);
             theme.RequestedTheme = "Dark";
-            theme.CustomAccentColor = Colors.PowderBlue;
+            theme.PreferSystemTheme = false;
+            theme.CustomAccentColor = Colors.DarkGoldenrod;
+            theme.PreferUserAccentColor = false;
             theme.UseSystemFontOnWindows = true;
         }
     }
