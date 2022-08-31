@@ -7,6 +7,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DownloadManager.Models;
+using DownloadManager.Services;
 using FluentAvalonia.UI.Controls;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,19 +17,45 @@ namespace DownloadManager.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private readonly IViewModelFactory _factory;
 
     [ObservableProperty]
     private string _title = "Download Manager";
 
-    
-    public ObservableCollection<ViewModelBase> Pages { get; }
+
+    public List<NavMenuItem> Pages { get; } = new();
+
+    public List<NavMenuItem> FooterPages { get; } = new();
 
     [ObservableProperty]
     private ViewModelBase? _currentPage;
+
+    [ObservableProperty]
+    private NavMenuItem? _selectedMenuItem;
     
-    
-    public MainViewModel(IEnumerable<ViewModelBase> viewModels)
+
+    partial void OnSelectedMenuItemChanged(NavMenuItem? value)
     {
-        Pages = new ObservableCollection<ViewModelBase>(viewModels);
+        if (value?.ContentViewModelType is null)
+            return;
+        CurrentPage = _factory.Create(value.ContentViewModelType);
+    }
+
+
+    public MainViewModel(IViewModelFactory factory)
+    {
+        _factory = factory;
+        Pages.Add(new NavMenuItem()
+        {
+            ContentViewModelType = typeof(DownloadViewModel),
+            Header = "Download list",
+            Icon = Symbol.Download
+        });
+        FooterPages.Add(new NavMenuItem()
+        {
+            ContentViewModelType = typeof(SettingsViewModel),
+            Header = "Settings",
+            Icon = Symbol.Settings
+        });
     }
 }

@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using DownloadManager.Services;
 using DownloadManager.ViewModels;
 using DownloadManager.Views;
 using Microsoft.Data.SqlClient;
@@ -18,6 +19,11 @@ namespace DownloadManager
 
 
         private IServiceProvider? _serviceProvider;
+
+
+        private partial class ViewModelFactory : IViewModelFactory
+        {
+        }
         
         public override void OnFrameworkInitializationCompleted()
         {
@@ -37,7 +43,9 @@ namespace DownloadManager
         {
             return new ServiceCollection()
                 .AddSingleton<MainViewModel>()
-                .AddScoped<SqlConnection>()
+                .AddSingleton<IViewModelFactory, ViewModelFactory>()
+                .AddSingleton<DownloadViewModel>()
+                .AddSingleton<SettingsViewModel>()
                 .BuildServiceProvider();
         }
     }
