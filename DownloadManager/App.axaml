@@ -9,4 +9,8 @@
     <Application.Styles>
         <FluentTheme Mode="Dark" DensityStyle="Compact"/>
     </Application.Styles>
+    
+    <Application.Resources>
+        <Color x:Key="SystemAccentColor">#301934</Color>
+    </Application.Resources>
 </Application>

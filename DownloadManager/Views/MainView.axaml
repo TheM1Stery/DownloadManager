@@ -7,8 +7,15 @@
         x:Class="DownloadManager.Views.MainView"
         x:CompileBindings="True"
         x:DataType="viewModels:MainViewModel"
+        ExtendClientAreaToDecorationsHint="True"
         Title="DownloadManager">
-    <Panel>
-        
-    </Panel>
+    <Grid RowDefinitions="Auto, *">
+        <Border Grid.Row="0" IsHitTestVisible="False" MinHeight="30" Background="#301934">
+            <TextBlock Text="{Binding Title}" HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="#1AFF9C"
+                       IsHitTestVisible="False"/>
+        </Border>
+        <TransitioningContentControl Grid.Row="1" Content="{Binding Store.CurrentViewModel}"/>
+    </Grid>
 </Window>
