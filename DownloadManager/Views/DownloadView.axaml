@@ -2,18 +2,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:viewModels="clr-namespace:DownloadManager.ViewModels"
              xmlns:models="clr-namespace:DownloadManager.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DownloadManager.Views.DownloadView"
              x:DataType="viewModels:DownloadViewModel"
              x:CompileBindings="True">
-   <Grid ColumnDefinitions="*, 0.4*">
+    <Grid ColumnDefinitions="*, 0.4*">
        <ListBox Grid.Column="0" Items="{Binding Items}">
            <ListBox.ItemTemplate>
-               <DataTemplate x:DataType="models:DownloadableItem">
-                   <Grid>
-                       
+               <DataTemplate x:DataType="viewModels:DownloadableItemViewModel">
+                   <Grid RowDefinitions="Auto, *" ColumnDefinitions="0.1*, *">
+                       <TextBlock Grid.Column="1" Grid.Row="0" 
+                                  Text="{Binding DownloadableItem.Name}"/>
+                       <Button Grid.Row="0" Grid.Column="0"
+                               Grid.RowSpan="2"
+                               HorizontalAlignment="Center" Width="36"
+                               Command="{Binding PauseCommand}">
+                           <Panel>
+                               <Image Source="../Assets/play.png" 
+                                      IsVisible="{Binding !DownloadableItem.IsPaused}" Width="20"
+                                      Height="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                               <Image Source="../Assets/pause.png" 
+                                      IsVisible="{Binding DownloadableItem.IsPaused}" Width="20"
+                                      Height="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                           </Panel>
+                       </Button>
+                       <ProgressBar Grid.Column="1" Grid.Row="1" ShowProgressText="True" Value="100" Maximum="100"/>
                    </Grid>
                </DataTemplate>
            </ListBox.ItemTemplate>
