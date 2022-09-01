@@ -3,11 +3,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:DownloadManager.ViewModels"
+             xmlns:models="clr-namespace:DownloadManager.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DownloadManager.Views.DownloadView"
              x:DataType="viewModels:DownloadViewModel"
              x:CompileBindings="True">
-    <Panel>
-        <TextBlock Text="Siktir"/>
-    </Panel>
+   <Grid ColumnDefinitions="*, 0.4*">
+       <ListBox Grid.Column="0" Items="{Binding Items}">
+           <ListBox.ItemTemplate>
+               <DataTemplate x:DataType="models:DownloadableItem">
+                   <Grid>
+                       
+                   </Grid>
+               </DataTemplate>
+           </ListBox.ItemTemplate>
+       </ListBox>
+   </Grid>
 </UserControl>

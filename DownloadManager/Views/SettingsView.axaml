@@ -14,6 +14,5 @@
                       Margin="5"
                       Items="{Binding Themes}" PlaceholderText="Select theme..."/>
         </StackPanel>
-        
     </Panel>
 </UserControl>

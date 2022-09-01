@@ -23,7 +23,9 @@ public partial class App
 
         public ViewModelBase Create(Type viewModelType)
         {
-            return (ViewModelBase) _serviceProvider.GetRequiredService(viewModelType);
+            if (viewModelType.IsSubclassOf(typeof(ViewModelBase)))
+                return (ViewModelBase) _serviceProvider.GetRequiredService(viewModelType);
+            throw new ArgumentException("This type does not inherit ViewModelBase");
         }
     }
 }

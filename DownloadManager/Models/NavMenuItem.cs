@@ -9,5 +9,6 @@ public class NavMenuItem
     
     public string? Header { get; set; }
     
+    // please avoid using reflection for creating the object with this type. Create a factory class instead
     public Type? ContentViewModelType { get; set; }
 }

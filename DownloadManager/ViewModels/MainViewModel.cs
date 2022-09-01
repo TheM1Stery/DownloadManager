@@ -1,17 +1,8 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using DownloadManager.Models;
 using DownloadManager.Services;
 using FluentAvalonia.UI.Controls;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DownloadManager.ViewModels;
 
@@ -42,16 +33,26 @@ public partial class MainViewModel : ViewModelBase
     }
 
 
+    private void AddMenuPages()
+    {
+        
+    }
+
+    private void AddFooterPages()
+    {
+        
+    }
+
     public MainViewModel(IViewModelFactory factory)
     {
         _factory = factory;
-        Pages.Add(new NavMenuItem()
+        Pages.Add(new NavMenuItem
         {
             ContentViewModelType = typeof(DownloadViewModel),
             Header = "Download list",
             Icon = Symbol.Download
         });
-        FooterPages.Add(new NavMenuItem()
+        FooterPages.Add(new NavMenuItem
         {
             ContentViewModelType = typeof(SettingsViewModel),
             Header = "Settings",
