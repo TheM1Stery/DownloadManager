@@ -15,5 +15,4 @@ public partial class DownloadableItemViewModel : ObservableObject
     {
         DownloadableItem.IsPaused = !DownloadableItem.IsPaused;
     }
-    
 }

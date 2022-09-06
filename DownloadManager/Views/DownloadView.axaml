@@ -34,5 +34,6 @@
                </DataTemplate>
            </ListBox.ItemTemplate>
        </ListBox>
-   </Grid>
+        <Border Grid.Column="0" ></Border>
+    </Grid>
 </UserControl>

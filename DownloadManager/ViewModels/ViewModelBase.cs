@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using FluentAvalonia.UI.Controls;
 
 namespace DownloadManager.ViewModels;
 
