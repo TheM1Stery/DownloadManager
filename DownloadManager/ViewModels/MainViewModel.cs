@@ -32,17 +32,6 @@ public partial class MainViewModel : ViewModelBase
         CurrentPage = _factory.Create(value.ContentViewModelType);
     }
 
-
-    private void AddMenuPages()
-    {
-        
-    }
-
-    private void AddFooterPages()
-    {
-        
-    }
-
     public MainViewModel(IViewModelFactory factory)
     {
         _factory = factory;

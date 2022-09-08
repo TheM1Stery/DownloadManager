@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
+using DownloadManager.Messages;
 
 namespace DownloadManager.ViewModels;
 
@@ -11,6 +13,9 @@ public partial class SettingsViewModel : ViewModelBase
     private string? _chosenTheme;
 
     public ObservableCollection<string> Themes { get; } = new();
+
+    [ObservableProperty]
+    private Color _chosenAccentColor;
 
 
     public SettingsViewModel()
@@ -26,5 +31,10 @@ public partial class SettingsViewModel : ViewModelBase
     {
         if (value != null) 
             WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(value));
+    }
+
+    partial void OnChosenAccentColorChanged(Color value)
+    {
+        WeakReferenceMessenger.Default.Send(new AccentColorValueChanged(value));
     }
 }

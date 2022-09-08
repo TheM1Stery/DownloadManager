@@ -9,8 +9,8 @@
              x:Class="DownloadManager.Views.DownloadView"
              x:DataType="viewModels:DownloadViewModel"
              x:CompileBindings="True">
-    <Grid ColumnDefinitions="*, 0.4*">
-       <ListBox Grid.Column="0" Items="{Binding Items}">
+    <Grid ColumnDefinitions="*, 0.3*" RowDefinitions="*, *">
+       <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Items="{Binding Items}">
            <ListBox.ItemTemplate>
                <DataTemplate x:DataType="viewModels:DownloadableItemViewModel">
                    <Grid RowDefinitions="Auto, *" ColumnDefinitions="0.1*, *">
@@ -21,12 +21,12 @@
                                HorizontalAlignment="Center" Width="36"
                                Command="{Binding PauseCommand}">
                            <Panel>
-                               <Image Source="../Assets/play.png" 
-                                      IsVisible="{Binding !DownloadableItem.IsPaused}" Width="20"
-                                      Height="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                               <Image Source="../Assets/pause.png" 
-                                      IsVisible="{Binding DownloadableItem.IsPaused}" Width="20"
-                                      Height="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                               <ui:SymbolIcon Symbol="Play" IsVisible="{Binding !DownloadableItem.IsPaused}"
+                                              Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                              FontSize="20"/>
+                               <ui:SymbolIcon Symbol="Pause" IsVisible="{Binding DownloadableItem.IsPaused}"
+                                              Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                              FontSize="20"/>
                            </Panel>
                        </Button>
                        <ProgressBar Grid.Column="1" Grid.Row="1" ShowProgressText="True" Value="100" Maximum="100"/>
@@ -34,6 +34,16 @@
                </DataTemplate>
            </ListBox.ItemTemplate>
        </ListBox>
-        <Border Grid.Column="0" ></Border>
+        <Expander Margin="5 15" Grid.Row="0" Grid.Column="1">
+            <Expander.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="Repair" FontSize="18"/>
+                    <TextBlock HorizontalAlignment="Right" Margin="10 0 0 0 " FontSize="16">Options</TextBlock>
+                </StackPanel>
+            </Expander.Header>
+            <StackPanel>
+                
+            </StackPanel>
+        </Expander>
     </Grid>
 </UserControl>

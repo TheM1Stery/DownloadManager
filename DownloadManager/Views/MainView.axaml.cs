@@ -4,12 +4,14 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
+using DownloadManager.Messages;
 using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Controls;
 
 namespace DownloadManager.Views
 {
-    public partial class MainView : CoreWindow, IRecipient<ValueChangedMessage<string>>, IRecipient<RequestMessage<string>>
+    public partial class MainView : CoreWindow, IRecipient<ValueChangedMessage<string>>, 
+        IRecipient<RequestMessage<string>>, IRecipient<AccentColorValueChanged>
     {
 
         private readonly FluentAvaloniaTheme _theme;
@@ -28,7 +30,6 @@ namespace DownloadManager.Views
             _theme.PreferSystemTheme = false;
             _theme.RequestedTheme = "Dark";
             _theme.PreferUserAccentColor = false;
-            _theme.CustomAccentColor = Colors.DarkSlateBlue;
             _theme.UseSystemFontOnWindows = true;
             SplashScreen = new SampleAppSplashScreen();
         }
@@ -55,6 +56,12 @@ namespace DownloadManager.Views
         public void Receive(RequestMessage<string> message)
         {
             message.Reply(_theme.RequestedTheme);
+        }
+
+        public void Receive(AccentColorValueChanged message)
+        {
+            var current = _theme.CustomAccentColor;
+            _theme.CustomAccentColor = message.Value ?? current;
         }
     }
 }
