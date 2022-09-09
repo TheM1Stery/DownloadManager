@@ -6,9 +6,4 @@
     <Application.Styles>
         <sty:FluentAvaloniaTheme/>
     </Application.Styles>
-    
-    <Application.Resources>
-        <!-- Change the background of the splash screen -->
-        <Color x:Key="CoreSplashScreenBackground">#ff483d8b</Color>
-    </Application.Resources>
 </Application>

@@ -10,12 +10,13 @@
              x:DataType="viewModels:SettingsViewModel">
     <Panel>
         <StackPanel>
-            <TextBlock Text="Theme selection: " Margin="10"/>
+            <TextBlock Text="Theme selection: " Margin="5"/>
             <ComboBox SelectedItem="{Binding ChosenTheme}"
-                      Margin="5"
+                      Margin="8"
                       Items="{Binding Themes}" PlaceholderText="Select theme..."/>
-            <TextBlock Text="Accent color selection: "/>
+            <TextBlock Text="Accent color selection: " Margin="5"/>
             <ui:ColorPickerButton
+                Margin="8"
                 UseColorPalette="True" UseColorTriangle="True" UseSpectrum="True" UseColorWheel="True"
                 Color="{Binding ChosenAccentColor}"/>
         </StackPanel>
