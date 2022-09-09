@@ -46,6 +46,7 @@ namespace DownloadManager
                 .AddSingleton<IViewModelFactory, ViewModelFactory>()
                 .AddSingleton<DownloadViewModel>()
                 .AddSingleton<SettingsViewModel>()
+                .AddSingleton<IFolderPicker, FolderPicker>()
                 .BuildServiceProvider();
         }
     }

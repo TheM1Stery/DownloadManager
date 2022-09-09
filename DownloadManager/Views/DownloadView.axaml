@@ -42,7 +42,21 @@
                 </StackPanel>
             </Expander.Header>
             <StackPanel>
-                
+                <TextBox Watermark="Link.." UseFloatingWatermark="True" Text="{Binding Link}" 
+                         Margin="5"/>
+                <Grid ColumnDefinitions="1.2*, 0.3*" Margin="5">
+                    <TextBox Grid.Column="0" Watermark="Path to save.." Text="{Binding Path}"
+                             HorizontalAlignment="Stretch" IsReadOnly="True"/>
+                    <Button Grid.Column="1" Command="{Binding SelectPathCommand}" Margin="5">
+                        <Panel>
+                            <ui:SymbolIcon Symbol="OpenFolderFilled" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Panel>
+                    </Button>
+                </Grid>
+                <TextBlock Text="Number of threads to download: " Margin="5"/>
+                <ComboBox Items="{Binding ThreadNumbers}" 
+                          SelectedItem="{Binding NumberOfThreads}" 
+                          Margin="5" HorizontalAlignment="Center"/>
             </StackPanel>
         </Expander>
     </Grid>
