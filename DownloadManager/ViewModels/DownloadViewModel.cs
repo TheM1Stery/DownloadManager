@@ -16,6 +16,8 @@ public partial class DownloadViewModel : ViewModelBase
 
     public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 5));
 
+    public ObservableCollection<string> Tags { get; } = new();
+
     [ObservableProperty]
     private string? _link;
 
@@ -28,9 +30,7 @@ public partial class DownloadViewModel : ViewModelBase
     public DownloadViewModel(IFolderPicker folderPicker)
     {
         _folderPicker = folderPicker;
-        
-        
-        
+
         // Items.Add(new DownloadableItemViewModel()
         // {
         //     DownloadableItem = new DownloadableItem()
@@ -50,12 +50,44 @@ public partial class DownloadViewModel : ViewModelBase
         {
             var dialog = new ContentDialog()
             {
-                Title = "Error", Content = "Error getting the file", PrimaryButtonText = "OK", DefaultButton = ContentDialogButton.Primary
+                Title = "Error", Content = "Error getting the file", PrimaryButtonText = "OK"
             };
             await dialog.ShowAsync();
             return;
         }
         Path = path;
     }
-    
+
+    [RelayCommand]
+    private async Task AddTagAsync()
+    {
+        var viewModel = new AddTagViewModel();
+        var dialog = new ContentDialog
+        {
+            Title = "Enter your tag",
+            Content = viewModel,
+            PrimaryButtonText = "Add",
+            SecondaryButtonText = "Cancel"
+        };
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && viewModel.Tag is not null)
+        {
+            Tags.Add(viewModel.Tag);
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteItemFromTags(string tag)
+    {
+        Tags.Remove(tag);
+    }
+
+    [RelayCommand]
+    private void ResetOptions()
+    {
+        Tags.Clear();
+        Path = string.Empty;
+        Link = string.Empty;
+        NumberOfThreads = 1;
+    }
 }
