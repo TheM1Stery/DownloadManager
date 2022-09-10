@@ -14,7 +14,7 @@
         <input:StandardUICommand x:Key="DeleteCommand" Kind="Delete" Command="{Binding DeleteItemFromTagsCommand}"/>
     </UserControl.Resources>
     <Grid ColumnDefinitions="*, 0.3*" RowDefinitions="*, *">
-       <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Items="{Binding Items}">
+       <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Items="{Binding Downloads}">
            <ListBox.ItemTemplate>
                <DataTemplate x:DataType="viewModels:DownloadableItemViewModel">
                    <Grid RowDefinitions="Auto, *" ColumnDefinitions="0.1*, *">
@@ -94,7 +94,7 @@
                     </Button>
                 </Grid>
                 <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button Content="Download" Margin="5"/>
+                    <Button Content="Download" Margin="5" Command="{Binding DownloadCommand}"/>
                     <Button Content="Reset" Margin="5" Command="{Binding ResetOptionsCommand}" 
                             ToolTip.Tip="Resets the options above"/>
                 </WrapPanel>

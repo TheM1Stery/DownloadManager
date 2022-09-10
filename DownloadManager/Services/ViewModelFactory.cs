@@ -16,7 +16,7 @@ public partial class App
             _serviceProvider = serviceProvider;
         }
 
-        public ViewModelBase Create<T>() where T : ViewModelBase
+        public T Create<T>() where T : ViewModelBase
         {
             return _serviceProvider.GetRequiredService<T>();
         }

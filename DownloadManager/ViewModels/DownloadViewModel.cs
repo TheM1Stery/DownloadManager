@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using DownloadManager.Messages;
 using DownloadManager.Models;
 using DownloadManager.Services;
 using FluentAvalonia.UI.Controls;
@@ -12,34 +15,38 @@ namespace DownloadManager.ViewModels;
 public partial class DownloadViewModel : ViewModelBase
 {
     private readonly IFolderPicker _folderPicker;
-    public ObservableCollection<DownloadableItemViewModel> Items { get; } = new();
+    private readonly IViewModelFactory _factory;
+    public ObservableCollection<DownloadableItemViewModel> Downloads { get; } = new();
 
     public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 5));
 
     public ObservableCollection<string> Tags { get; } = new();
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(DownloadCommand))]
     private string? _link;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(DownloadCommand))]
     private string? _path;
 
     [ObservableProperty]
     private int _numberOfThreads = 1;
+    
 
-    public DownloadViewModel(IFolderPicker folderPicker)
+    public bool CanExecuteDownload =>
+        !string.IsNullOrWhiteSpace(Link) && !string.IsNullOrWhiteSpace(Path) && Tags.Count != 0;
+
+    public DownloadViewModel(IFolderPicker folderPicker, IViewModelFactory factory)
     {
         _folderPicker = folderPicker;
+        _factory = factory;
+        Tags.CollectionChanged += TagsOnCollectionChanged;
+    }
 
-        // Items.Add(new DownloadableItemViewModel()
-        // {
-        //     DownloadableItem = new DownloadableItem()
-        //     {
-        //         Name = "salam.txt",
-        //         Size = 1000000L,
-        //         IsPaused = false
-        //     }
-        // });
+    private void TagsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        DownloadCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -61,7 +68,7 @@ public partial class DownloadViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddTagAsync()
     {
-        var viewModel = new AddTagViewModel();
+        var viewModel = _factory.Create<AddTagViewModel>();
         var dialog = new ContentDialog
         {
             Title = "Enter your tag",
@@ -89,5 +96,19 @@ public partial class DownloadViewModel : ViewModelBase
         Path = string.Empty;
         Link = string.Empty;
         NumberOfThreads = 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExecuteDownload))]
+    private void Download()
+    {
+        Downloads.Add(_factory.Create<DownloadableItemViewModel>());
+        WeakReferenceMessenger.Default.Send(new DownloadItemMessage((new DownloadableItem()
+        {
+            InstalledPath = Path,
+            Name = "Seymur.txt",
+            LinkToDownload = Link,
+            Tags = Tags.ToList()
+        }, _numberOfThreads)));
+        ResetOptions();
     }
 }

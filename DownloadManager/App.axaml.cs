@@ -5,7 +5,6 @@ using Avalonia.Markup.Xaml;
 using DownloadManager.Services;
 using DownloadManager.ViewModels;
 using DownloadManager.Views;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DownloadManager
@@ -42,11 +41,15 @@ namespace DownloadManager
         private IServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
+                .AddHttpClient()
                 .AddSingleton<MainViewModel>()
                 .AddSingleton<IViewModelFactory, ViewModelFactory>()
                 .AddSingleton<DownloadViewModel>()
                 .AddSingleton<SettingsViewModel>()
+                .AddTransient<DownloadableItemViewModel>()
                 .AddSingleton<IFolderPicker, FolderPicker>()
+                .AddTransient<IFileDownloader, FileDownloader>()
+                .AddTransient<AddTagViewModel>()
                 .BuildServiceProvider();
         }
     }
