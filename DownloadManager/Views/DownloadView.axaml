@@ -38,11 +38,11 @@
                </DataTemplate>
            </ListBox.ItemTemplate>
        </ListBox>
-        <Expander Margin="5 15" Grid.Row="0" Grid.Column="1">
+        <Expander Margin="5 15" Grid.Row="0" Grid.Column="1" IsExpanded="True">
             <Expander.Header>
                 <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="Repair" FontSize="18"/>
-                    <TextBlock HorizontalAlignment="Right" Margin="10 0 0 0 " FontSize="16">Options</TextBlock>
+                    <ui:SymbolIcon Symbol="Download" FontSize="18"/>
+                    <TextBlock HorizontalAlignment="Right" Margin="10 0 0 0 " FontSize="16">Download options</TextBlock>
                 </StackPanel>
             </Expander.Header>
             <StackPanel>

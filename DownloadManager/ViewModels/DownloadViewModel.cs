@@ -18,7 +18,7 @@ public partial class DownloadViewModel : ViewModelBase
     private readonly IViewModelFactory _factory;
     public ObservableCollection<DownloadableItemViewModel> Downloads { get; } = new();
 
-    public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 5));
+    public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 6));
 
     public ObservableCollection<string> Tags { get; } = new();
 
