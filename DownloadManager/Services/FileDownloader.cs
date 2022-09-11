@@ -34,12 +34,28 @@ public class FileDownloader : IFileDownloader
     {
         using var client = new HttpClient();
         var head = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, urlToFile));
-        if (head.Headers.AcceptRanges.First() != "bytes")
+        if (head.Headers.AcceptRanges.Count == 0 || head.Headers.AcceptRanges.First() != "bytes")
         {
             NumberOfThreads = 1;
         }
-        var filename = head.Content.Headers.ContentDisposition?.FileName ?? Path.GetFileName(urlToFile);
-        // File.Create(toPath + $"/{filename}");
+        var name = head.Content.Headers.ContentDisposition?.FileName ?? Path.GetFileName(urlToFile);
+        var invalidCharacters = Path.GetInvalidFileNameChars();
+        var filename = string.Concat(name.Replace("\"", "")
+            .Where(x => !invalidCharacters.Contains(x)));
+        if (!Path.HasExtension(filename))
+        {
+            filename += "." + head.Content.Headers.ContentType?.MediaType?.Split("/")[1];
+        }
+        var createdStream = File.Create(toPath + $@"\{filename}");
+        await createdStream.DisposeAsync();
+        if (NumberOfThreads == 1)
+        {
+            await using var httpStream = await client.GetStreamAsync(urlToFile);
+            await using var fStream =
+                new FileStream(toPath + $@"\{filename}", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+            await httpStream.CopyToAsync(fStream);
+            return;
+        }
         var length = head.Content.Headers.ContentLength;
         var bytePerTask = length / NumberOfThreads;
         var remainder = length % NumberOfThreads;

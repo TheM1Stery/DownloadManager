@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -23,6 +25,15 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
 
     [ObservableProperty]
     private long? _maximum;
+
+    [ObservableProperty]
+    private string? _error;
+
+    [ObservableProperty]
+    private IBrush? _errorBrush;
+
+    [ObservableProperty]
+    private bool? _isErrorMessageVisible;
     
     public DownloadableItemViewModel(IFileDownloader downloader)
     {
@@ -46,9 +57,23 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
             return;
         var fileInfo = await _downloader.GetFileInfo(_downloadableItem.LinkToDownload);
         Maximum = fileInfo.ContentLength;
-        _downloadableItem.Name = fileInfo.ContentDisposition?.Name ?? Path.GetFileName(_downloadableItem.LinkToDownload);
+        _downloadableItem.Name = fileInfo.ContentDisposition?.FileName ?? Path.GetFileName(_downloadableItem.LinkToDownload);
         _downloader.BytesDownloaded += OnDownloaderOnBytesDownloaded;
-        await _downloader.DownloadFile(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+        try
+        {
+            await _downloader.DownloadFile(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+        }
+        catch (Exception e)
+        {
+            Error = "Error! Coudln't download the file";
+            ErrorBrush = Brushes.Red;
+            IsErrorMessageVisible = true;
+            _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
+            return;
+        }
+        Error = "Success";
+        ErrorBrush = Brushes.Green;
+        IsErrorMessageVisible = true;
         _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
     }
 
