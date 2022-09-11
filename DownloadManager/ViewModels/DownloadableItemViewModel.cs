@@ -58,14 +58,18 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
         var fileInfo = await _downloader.GetFileInfo(_downloadableItem.LinkToDownload);
         Maximum = fileInfo.ContentLength;
         _downloadableItem.Name = fileInfo.ContentDisposition?.FileName ?? Path.GetFileName(_downloadableItem.LinkToDownload);
+        if (!Path.HasExtension(_downloadableItem.Name))
+        {
+            _downloadableItem.Name += "." + fileInfo.ContentType?.MediaType?.Split("/")[1];
+        }
         _downloader.BytesDownloaded += OnDownloaderOnBytesDownloaded;
         try
         {
             await _downloader.DownloadFile(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Error = "Error! Coudln't download the file";
+            Error = "Error! Couldn't download the file";
             ErrorBrush = Brushes.Red;
             IsErrorMessageVisible = true;
             _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;

@@ -105,7 +105,6 @@ public partial class DownloadViewModel : ViewModelBase
         WeakReferenceMessenger.Default.Send(new DownloadItemMessage((new DownloadableItem()
         {
             InstalledPath = Path,
-            Name = "Seymur.txt",
             LinkToDownload = Link,
             Tags = Tags.ToList()
         }, _numberOfThreads)));

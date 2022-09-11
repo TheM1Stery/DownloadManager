@@ -54,6 +54,7 @@ public class FileDownloader : IFileDownloader
             await using var fStream =
                 new FileStream(toPath + $@"\{filename}", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
             await httpStream.CopyToAsync(fStream);
+            BytesDownloaded?.Invoke(httpStream.Length);
             return;
         }
         var length = head.Content.Headers.ContentLength;

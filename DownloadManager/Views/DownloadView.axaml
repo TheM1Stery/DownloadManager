@@ -30,13 +30,13 @@
            <ListBox.ItemTemplate>
                <DataTemplate x:DataType="viewModels:DownloadableItemViewModel">
                    <Grid RowDefinitions="Auto, *" ColumnDefinitions="0.1*, *">
-                       <WrapPanel Grid.Row="0" Grid.Column="1" Margin="5">
+                       <Panel Grid.Row="0" Grid.Column="1" Margin="5">
                            <TextBlock HorizontalAlignment="Left"
                                       Text="{Binding DownloadableItem.Name}"/>
                            <TextBlock HorizontalAlignment="Right" 
                                       Text="{Binding Error}" Foreground="{Binding ErrorBrush}"
                                       IsVisible="{Binding IsErrorMessageVisible}" Margin="5"/>
-                       </WrapPanel>
+                       </Panel>
                        
                        <Button Grid.Row="0" Grid.Column="0"
                                Grid.RowSpan="2"
