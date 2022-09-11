@@ -10,8 +10,10 @@
         x:Class="DownloadManager.Views.MainView"
         x:CompileBindings="True"
         x:DataType="viewModels:MainViewModel"
+        Title="{Binding Title}"
         MinHeight="750"
-        MinWidth="1500">
+        MinWidth="1500"
+        Icon="../Assets/file-download-icon-19.jpg">
     <Window.DataTemplates>
         <local:ViewLocator/>
     </Window.DataTemplates>
