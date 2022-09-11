@@ -22,23 +22,17 @@ public class FileDownloader : IFileDownloader
     
 
     public event Action<long>? BytesDownloaded;
+    
 
-    public async Task<HttpContentHeaders> GetFileInfo(string urlToFile)
+    public async Task DownloadFileAsync(string url, string toPath)
     {
-        using var client = new HttpClient();
-        var head =  await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, urlToFile));
-        return head.Content.Headers;
-    }
-
-    public async Task DownloadFile(string urlToFile, string toPath)
-    {
-        using var client = new HttpClient();
-        var head = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, urlToFile));
+        using var client = _factory.CreateClient();
+        var head = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
         if (head.Headers.AcceptRanges.Count == 0 || head.Headers.AcceptRanges.First() != "bytes")
         {
             NumberOfThreads = 1;
         }
-        var name = head.Content.Headers.ContentDisposition?.FileName ?? Path.GetFileName(urlToFile);
+        var name = head.Content.Headers.ContentDisposition?.FileName ?? Path.GetFileName(url);
         var invalidCharacters = Path.GetInvalidFileNameChars();
         var filename = string.Concat(name.Replace("\"", "")
             .Where(x => !invalidCharacters.Contains(x)));
@@ -48,16 +42,16 @@ public class FileDownloader : IFileDownloader
         }
         var createdStream = File.Create(toPath + $@"\{filename}");
         await createdStream.DisposeAsync();
+        var length = head.Content.Headers.ContentLength;
         if (NumberOfThreads == 1)
         {
-            await using var httpStream = await client.GetStreamAsync(urlToFile);
+            await using var httpStream = await client.GetStreamAsync(url);
             await using var fStream =
                 new FileStream(toPath + $@"\{filename}", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
             await httpStream.CopyToAsync(fStream);
-            BytesDownloaded?.Invoke(httpStream.Length);
+            BytesDownloaded?.Invoke(length ?? 0);
             return;
         }
-        var length = head.Content.Headers.ContentLength;
         var bytePerTask = length / NumberOfThreads;
         var remainder = length % NumberOfThreads;
         var list = new List<Task>();
@@ -72,10 +66,11 @@ public class FileDownloader : IFileDownloader
             {
                 tempEnd += remainder ?? 0;
             }
+            var i1 = i;
             list.Add(Task.Run( async () =>
             {
-                using var httpClient = new HttpClient();
-                var request = new HttpRequestMessage { RequestUri = new Uri(urlToFile) };
+                using var httpClient = _factory.CreateClient();
+                var request = new HttpRequestMessage { RequestUri = new Uri(url) };
                 request.Headers.Range = new RangeHeaderValue(tempStart, tempEnd);
                 using var response = await httpClient.SendAsync(request);
                 await using var stream = await response.Content.ReadAsStreamAsync();
@@ -87,7 +82,12 @@ public class FileDownloader : IFileDownloader
                 });
                 fileStream.Position = tempStart;
                 await stream.CopyToAsync(fileStream);
-                BytesDownloaded?.Invoke(tempEnd - tempStart ?? 0);                
+                if (i1 == NumberOfThreads - 1)
+                {
+                    BytesDownloaded?.Invoke(bytePerTask + remainder ?? 0);
+                    return;
+                }
+                BytesDownloaded?.Invoke(bytePerTask ?? 0);                
             }));
             start = end;
         }

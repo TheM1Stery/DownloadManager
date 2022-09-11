@@ -42,14 +42,15 @@ namespace DownloadManager
         {
             return new ServiceCollection()
                 .AddHttpClient()
-                .AddSingleton<MainViewModel>()
                 .AddSingleton<IViewModelFactory, ViewModelFactory>()
+                .AddSingleton<MainViewModel>()
                 .AddSingleton<DownloadViewModel>()
                 .AddSingleton<SettingsViewModel>()
                 .AddTransient<DownloadableItemViewModel>()
+                .AddTransient<AddTagViewModel>()
                 .AddSingleton<IFolderPicker, FolderPicker>()
                 .AddTransient<IFileDownloader, FileDownloader>()
-                .AddTransient<AddTagViewModel>()
+                .AddSingleton<IHttpHeadRequester, HttpHeadRequester>()
                 .BuildServiceProvider();
         }
     }

@@ -27,13 +27,13 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
     private long? _maximum;
 
     [ObservableProperty]
-    private string? _error;
+    private string? _downloadStatus;
 
     [ObservableProperty]
-    private IBrush? _errorBrush;
+    private IBrush? _statusBrush;
 
     [ObservableProperty]
-    private bool? _isErrorMessageVisible;
+    private bool? _isStatusMessageVisible;
     
     public DownloadableItemViewModel(IFileDownloader downloader)
     {
@@ -55,32 +55,28 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
         WeakReferenceMessenger.Default.Unregister<DownloadItemMessage>(this);
         if (_downloadableItem.LinkToDownload is null || _downloadableItem.InstalledPath is null) 
             return;
-        var fileInfo = await _downloader.GetFileInfo(_downloadableItem.LinkToDownload);
-        Maximum = fileInfo.ContentLength;
-        _downloadableItem.Name = fileInfo.ContentDisposition?.FileName ?? Path.GetFileName(_downloadableItem.LinkToDownload);
-        if (!Path.HasExtension(_downloadableItem.Name))
-        {
-            _downloadableItem.Name += "." + fileInfo.ContentType?.MediaType?.Split("/")[1];
-        }
+        Maximum = _downloadableItem.Size;
         _downloader.BytesDownloaded += OnDownloaderOnBytesDownloaded;
         try
         {
-            await _downloader.DownloadFile(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+            await _downloader.DownloadFileAsync(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+            DownloadStatus = "Success";
+            StatusBrush = Brushes.Green;
+            IsStatusMessageVisible = true;
         }
         catch (Exception)
         {
-            Error = "Error! Couldn't download the file";
-            ErrorBrush = Brushes.Red;
-            IsErrorMessageVisible = true;
-            _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
-            return;
+            DownloadStatus = "Error! Couldn't download the file";
+            StatusBrush = Brushes.Red;
+            IsStatusMessageVisible = true;
         }
-        Error = "Success";
-        ErrorBrush = Brushes.Green;
-        IsErrorMessageVisible = true;
-        _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
+        finally
+        {
+            _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
+        }
+        
     }
-
+    
     private void OnDownloaderOnBytesDownloaded(long progress)
     {
         Progress += progress;

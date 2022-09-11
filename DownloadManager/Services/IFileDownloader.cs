@@ -10,9 +10,8 @@ public interface IFileDownloader
 {
     public int NumberOfThreads { get; set; }
 
-    public Task<HttpContentHeaders> GetFileInfo(string urlToFile);
 
-    public Task DownloadFile(string urlToFile, string toPath);
+    public Task DownloadFileAsync(string url, string toPath);
     
     public event Action<long>? BytesDownloaded;
 
