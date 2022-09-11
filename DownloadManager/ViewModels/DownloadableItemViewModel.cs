@@ -16,6 +16,10 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
     private DownloadableItem _downloadableItem = null!;
 
 
+    [ObservableProperty]
+    private long _progress;
+
+
     public DownloadableItemViewModel(IFileDownloader downloader)
     {
         _downloader = downloader;
@@ -29,10 +33,19 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
         DownloadableItem.IsPaused = !DownloadableItem.IsPaused;
     }
     
-    public void Receive(DownloadItemMessage message)
+    public async void Receive(DownloadItemMessage message)
     {
         DownloadableItem = message.Value.Item1;
         _downloader.NumberOfThreads = message.Value.Item2;
         WeakReferenceMessenger.Default.Unregister<DownloadItemMessage>(this);
+        if (_downloadableItem.LinkToDownload is null || _downloadableItem.InstalledPath is null) 
+            return;
+        _downloader.BytesDownloaded += OnDownloaderOnBytesDownloaded;
+        await _downloader.DownloadFile(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+    }
+
+    private void OnDownloaderOnBytesDownloaded(long progress)
+    {
+        Progress += progress;
     }
 }

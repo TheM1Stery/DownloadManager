@@ -17,8 +17,9 @@ public class FileDownloader : IFileDownloader
         _factory = factory;
     }
     public int NumberOfThreads { get; set; }
-    
-    
+
+
+    public event Action<long>? BytesDownloaded;
     
     public async Task DownloadFile(string urlToFile, string toPath)
     {
@@ -38,7 +39,7 @@ public class FileDownloader : IFileDownloader
         long? end = 0L;
         for (var i = 0; i < NumberOfThreads; i++)
         {
-            var tempStart = (long)start!;
+            var tempStart = start ?? 0;
             end += bytePerTask;
             var tempEnd = end;
             if (i == NumberOfThreads - 1)
@@ -60,6 +61,7 @@ public class FileDownloader : IFileDownloader
                 });
                 fileStream.Position = tempStart;
                 await stream.CopyToAsync(fileStream);
+                BytesDownloaded?.Invoke(stream.Length);                
             }));
             start = end;
         }
