@@ -51,6 +51,7 @@ namespace DownloadManager
                 .AddSingleton<IFolderPicker, FolderPicker>()
                 .AddTransient<IFileDownloader, FileDownloader>()
                 .AddSingleton<IHttpHeadRequester, HttpHeadRequester>()
+                .AddSingleton<IDialog, Dialog>()
                 .BuildServiceProvider();
         }
     }

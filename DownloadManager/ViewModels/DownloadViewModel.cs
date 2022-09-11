@@ -19,6 +19,7 @@ public partial class DownloadViewModel : ViewModelBase
     private readonly IFolderPicker _folderPicker;
     private readonly IViewModelFactory _factory;
     private readonly IHttpHeadRequester _headRequester;
+    private readonly IDialog _dialog;
     public ObservableCollection<DownloadableItemViewModel> Downloads { get; } = new();
 
     public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 6));
@@ -40,11 +41,13 @@ public partial class DownloadViewModel : ViewModelBase
     public bool CanExecuteDownload =>
         !string.IsNullOrWhiteSpace(Link) && !string.IsNullOrWhiteSpace(Path) && Tags.Count != 0;
 
-    public DownloadViewModel(IFolderPicker folderPicker, IViewModelFactory factory, IHttpHeadRequester headRequester)
+    public DownloadViewModel(IFolderPicker folderPicker, IViewModelFactory factory, 
+        IHttpHeadRequester headRequester, IDialog dialog)
     {
         _folderPicker = folderPicker;
         _factory = factory;
         _headRequester = headRequester;
+        _dialog = dialog;
         Tags.CollectionChanged += TagsOnCollectionChanged;
     }
 
@@ -59,11 +62,7 @@ public partial class DownloadViewModel : ViewModelBase
         var path = await _folderPicker.GetPathAsync();
         if (path is null)
         {
-            var dialog = new ContentDialog()
-            {
-                Title = "Error", Content = "Error getting the file", PrimaryButtonText = "OK"
-            };
-            await dialog.ShowAsync();
+            await _dialog.ShowMessageAsync("Error", "Error getting path. No path was provided");
             return;
         }
         Path = path;
@@ -73,14 +72,8 @@ public partial class DownloadViewModel : ViewModelBase
     private async Task AddTagAsync()
     {
         var viewModel = _factory.Create<AddTagViewModel>();
-        var dialog = new ContentDialog
-        {
-            Title = "Enter your tag",
-            Content = viewModel,
-            PrimaryButtonText = "Add",
-            SecondaryButtonText = "Cancel"
-        };
-        var result = await dialog.ShowAsync();
+        var result = await _dialog.ShowContentAsync("Enter your tag", viewModel, 
+            "Add", "Cancel");
         if (result == ContentDialogResult.Primary && viewModel.Tag is not null)
         {
             Tags.Add(viewModel.Tag);
@@ -110,7 +103,7 @@ public partial class DownloadViewModel : ViewModelBase
     
     private static bool IsValidUrl(string url)
     {
-        var pattern = @"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$";
+        const string pattern = @"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$";
         var rgx = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
         return rgx.IsMatch(url);
     }
@@ -118,23 +111,15 @@ public partial class DownloadViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanExecuteDownload))]
     private async Task DownloadAsync()
     {
-        if (!IsValidUrl(Link!))
+        if (!IsValidUrl(Link!)) // Link will never be null here(bc of CanExecute)
         {
-            var dialog = new ContentDialog
-            {
-                Title = "Invalid Url", Content = "The provided url is invalid.", PrimaryButtonText = "OK"
-            };
-            await dialog.ShowAsync();
+            await _dialog.ShowMessageAsync("Invalid Url", "The provided url is invalid!");
             return;
         }
         var headResponse = await _headRequester.SendHeadRequestAsync(Link!); // Link will never be null here(bc of CanExecute)
         if (!headResponse.IsSuccessStatusCode)
         {
-            var dialog = new ContentDialog
-            {
-                Title = "Error", Content = "Error retrieving the file", PrimaryButtonText = "OK"
-            };
-            await dialog.ShowAsync();
+            await _dialog.ShowMessageAsync("Error", "Error retrieving the file");
             return;
         }
         var fileName = headResponse.Content.Headers.ContentDisposition?.FileName ?? 
@@ -147,11 +132,7 @@ public partial class DownloadViewModel : ViewModelBase
         var driveInfo = new DriveInfo(System.IO.Path.GetPathRoot(Path) ?? string.Empty);
         if (driveInfo.AvailableFreeSpace < fileLength)
         {
-            var dialog = new ContentDialog
-            {
-                Title = "Size error", Content = "You don't have enough space on this disk", PrimaryButtonText = "OK"
-            };
-            await dialog.ShowAsync();
+            await _dialog.ShowMessageAsync("Size error", "You don't have enough space on this disk");
             return;
         }
         Downloads.Add(_factory.Create<DownloadableItemViewModel>());
