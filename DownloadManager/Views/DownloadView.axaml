@@ -5,7 +5,7 @@
              xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:viewModels="clr-namespace:DownloadManager.ViewModels"
              xmlns:models="clr-namespace:DownloadManager.Models"
-             xmlns:mics="clr-namespace:DownloadManager.Miscellaneous"
+             xmlns:misc="clr-namespace:DownloadManager.Miscellaneous"
              xmlns:input="clr-namespace:FluentAvalonia.UI.Input;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DownloadManager.Views.DownloadView"
@@ -21,7 +21,7 @@
                    <Setter Property="Transitions">
                        <Transitions>
                            <DoubleTransition 
-                               Property="(local:ProgressBarWorkaround.Value)"
+                               Property="(misc:ProgressBarWorkaround.Value)"
                                Duration="0:0:0.5"/>
                        </Transitions>
                    </Setter>
@@ -45,8 +45,8 @@
                                               FontSize="20"/>
                            </Panel>
                        </Button>
-                       <ProgressBar Grid.Column="1" Grid.Row="1" ShowProgressText="True" 
-                                    mics:ProgressBarWorkaround.Value="{Binding Progress}"/>
+                       <ProgressBar Grid.Column="1" Grid.Row="1" ShowProgressText="True" Maximum="{Binding Maximum}"
+                                    misc:ProgressBarWorkaround.Value="{Binding Progress}"/>
                    </Grid>
                </DataTemplate>
            </ListBox.ItemTemplate>

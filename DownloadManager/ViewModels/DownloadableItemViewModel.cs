@@ -1,3 +1,4 @@
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -20,6 +21,9 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
     private long _progress;
 
 
+    [ObservableProperty]
+    private long? _maximum;
+    
     public DownloadableItemViewModel(IFileDownloader downloader)
     {
         _downloader = downloader;
@@ -40,8 +44,12 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
         WeakReferenceMessenger.Default.Unregister<DownloadItemMessage>(this);
         if (_downloadableItem.LinkToDownload is null || _downloadableItem.InstalledPath is null) 
             return;
+        var fileInfo = await _downloader.GetFileInfo(_downloadableItem.LinkToDownload);
+        Maximum = fileInfo.ContentLength;
+        _downloadableItem.Name = fileInfo.ContentDisposition?.Name ?? Path.GetFileName(_downloadableItem.LinkToDownload);
         _downloader.BytesDownloaded += OnDownloaderOnBytesDownloaded;
         await _downloader.DownloadFile(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+        _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
     }
 
     private void OnDownloaderOnBytesDownloaded(long progress)

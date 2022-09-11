@@ -6,7 +6,8 @@ namespace DownloadManager.Models;
 
 public partial class DownloadableItem : ObservableObject
 {
-    public string? Name { get; set; }
+    [ObservableProperty]
+    private string? _name;
     
     public long Size { get; set; }
     
