@@ -56,10 +56,11 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
         if (_downloadableItem.LinkToDownload is null || _downloadableItem.InstalledPath is null) 
             return;
         Maximum = _downloadableItem.Size;
-        _downloader.BytesDownloaded += OnDownloaderOnBytesDownloaded;
+        var progress = new Progress<long>(OnProgressReport);
         try
         {
-            await _downloader.DownloadFileAsync(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath);
+            await _downloader.DownloadFileAsync(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath, 
+                progress);
             DownloadStatus = "Success";
             StatusBrush = Brushes.Green;
             IsStatusMessageVisible = true;
@@ -70,14 +71,10 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
             StatusBrush = Brushes.Red;
             IsStatusMessageVisible = true;
         }
-        finally
-        {
-            _downloader.BytesDownloaded -= OnDownloaderOnBytesDownloaded;
-        }
-        
+
     }
-    
-    private void OnDownloaderOnBytesDownloaded(long progress)
+
+    private void OnProgressReport(long progress)
     {
         Progress += progress;
     }

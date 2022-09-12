@@ -13,6 +13,8 @@
              x:CompileBindings="True">
     <UserControl.Resources>
         <input:StandardUICommand x:Key="DeleteCommand" Kind="Delete" Command="{Binding DeleteItemFromTagsCommand}"/>
+        <input:StandardUICommand x:Key="DeleteDownloadCommand" Kind="Delete" 
+                                 Command="{Binding DeleteItemFromDownloadsCommand}"/>
     </UserControl.Resources>
     <Grid ColumnDefinitions="*, 0.3*" RowDefinitions="*, *">
        <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Items="{Binding Downloads}" Margin="5">
@@ -38,21 +40,32 @@
                                       Foreground="{Binding StatusBrush}"
                                       IsVisible="{Binding IsStatusMessageVisible}" Margin="5"/>
                        </Panel>
-                       
-                       <Button Grid.Row="0" Grid.Column="0"
-                               Grid.RowSpan="2"
-                               HorizontalAlignment="Center" Width="36"
-                               Command="{Binding PauseCommand}">
-                           <Panel>
-                               <ui:SymbolIcon Symbol="Play" IsVisible="{Binding !DownloadableItem.IsPaused}"
-                                              Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                              FontSize="20"/>
-                               <ui:SymbolIcon Symbol="Pause" IsVisible="{Binding DownloadableItem.IsPaused}"
-                                              Width="20" Height="20" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                              FontSize="20"/>
-                           </Panel>
-                       </Button>
-                       <ProgressBar Grid.Column="1" Grid.Row="1" Minimum="0" ShowProgressText="False" Maximum="{Binding Maximum}"
+                       <Grid Grid.Row="0" Grid.Column="0"
+                             ColumnDefinitions="*, *"
+                             Grid.RowSpan="2">
+                           <Button Grid.Row="0" Grid.Column="0"
+                                   HorizontalAlignment="Center" MinWidth="36"
+                                   Command="{Binding PauseCommand}">
+                               <Panel>
+                                   <ui:SymbolIcon Symbol="Play" IsVisible="{Binding !DownloadableItem.IsPaused}"
+                                                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                  FontSize="20"/>
+                                   <ui:SymbolIcon Symbol="Pause" IsVisible="{Binding DownloadableItem.IsPaused}"
+                                                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                  FontSize="20"/>
+                               </Panel>
+                           </Button>
+                           <Button Grid.Column="1" 
+                                   Command="{StaticResource DeleteDownloadCommand}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   CommandParameter="{ReflectionBinding 
+                                            RelativeSource={RelativeSource Self}, Path=DataContext}"
+                                   Background="Transparent" Margin="5 0 0 0">
+                               <ui:SymbolIcon Symbol="Delete" FontSize="20"/>
+                           </Button>
+                       </Grid>
+                       <ProgressBar Grid.Column="1" Grid.Row="1" Minimum="0" ShowProgressText="False" 
+                                    Maximum="{Binding Maximum}"
                                     misc:ProgressBarWorkaround.Value="{Binding Progress}"/>
                    </Grid>
                </DataTemplate>

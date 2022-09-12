@@ -11,8 +11,6 @@ public interface IFileDownloader
     public int NumberOfThreads { get; set; }
 
 
-    public Task DownloadFileAsync(string url, string toPath);
+    public Task DownloadFileAsync(string url, string toPath, IProgress<long>? progress = null);
     
-    public event Action<long>? BytesDownloaded;
-
 }

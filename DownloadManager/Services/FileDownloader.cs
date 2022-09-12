@@ -18,13 +18,8 @@ public class FileDownloader : IFileDownloader
         _factory = factory;
     }
     public int NumberOfThreads { get; set; }
-
     
-
-    public event Action<long>? BytesDownloaded;
-    
-
-    public async Task DownloadFileAsync(string url, string toPath)
+    public async Task DownloadFileAsync(string url, string toPath, IProgress<long>? progress = null)
     {
         using var client = _factory.CreateClient();
         var head = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
@@ -49,7 +44,7 @@ public class FileDownloader : IFileDownloader
             await using var fStream =
                 new FileStream(toPath + $@"\{filename}", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
             await httpStream.CopyToAsync(fStream);
-            BytesDownloaded?.Invoke(length ?? 0);
+            progress?.Report(length ?? 0);
             return;
         }
         var bytePerTask = length / NumberOfThreads;
@@ -84,10 +79,10 @@ public class FileDownloader : IFileDownloader
                 await stream.CopyToAsync(fileStream);
                 if (i1 == NumberOfThreads - 1)
                 {
-                    BytesDownloaded?.Invoke(bytePerTask + remainder ?? 0);
+                    progress?.Report(bytePerTask + remainder ?? 0);
                     return;
                 }
-                BytesDownloaded?.Invoke(bytePerTask ?? 0);                
+                progress?.Report(bytePerTask ?? 0);
             }));
             start = end;
         }
