@@ -17,15 +17,13 @@ public class FileDownloader : IFileDownloader
     {
         _factory = factory;
     }
-    public int NumberOfThreads { get; set; }
-    
-    public async Task DownloadFileAsync(string url, string toPath, IProgress<long>? progress = null)
+    public async Task DownloadFileAsync(string url, string toPath,int numberOfThreads, IProgress<long>? progress = null)
     {
         using var client = _factory.CreateClient();
         var head = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
         if (head.Headers.AcceptRanges.Count == 0 || head.Headers.AcceptRanges.First() != "bytes")
         {
-            NumberOfThreads = 1;
+            numberOfThreads = 1;
         }
         var name = head.Content.Headers.ContentDisposition?.FileName ?? Path.GetFileName(url);
         var invalidCharacters = Path.GetInvalidFileNameChars();
@@ -38,7 +36,7 @@ public class FileDownloader : IFileDownloader
         var createdStream = File.Create(toPath + $@"\{filename}");
         await createdStream.DisposeAsync();
         var length = head.Content.Headers.ContentLength;
-        if (NumberOfThreads == 1)
+        if (numberOfThreads == 1)
         {
             await using var httpStream = await client.GetStreamAsync(url);
             await using var fStream =
@@ -47,17 +45,17 @@ public class FileDownloader : IFileDownloader
             progress?.Report(length ?? 0);
             return;
         }
-        var bytePerTask = length / NumberOfThreads;
-        var remainder = length % NumberOfThreads;
+        var bytePerTask = length / numberOfThreads;
+        var remainder = length % numberOfThreads;
         var list = new List<Task>();
         long? start = 0L;
         long? end = 0L;
-        for (var i = 0; i < NumberOfThreads; i++)
+        for (var i = 0; i < numberOfThreads; i++)
         {
             var tempStart = start ?? 0;
             end += bytePerTask;
             var tempEnd = end;
-            if (i == NumberOfThreads - 1)
+            if (i == numberOfThreads - 1)
             {
                 tempEnd += remainder ?? 0;
             }
@@ -77,7 +75,7 @@ public class FileDownloader : IFileDownloader
                 });
                 fileStream.Position = tempStart;
                 await stream.CopyToAsync(fileStream);
-                if (i1 == NumberOfThreads - 1)
+                if (i1 == numberOfThreads - 1)
                 {
                     progress?.Report(bytePerTask + remainder ?? 0);
                     return;

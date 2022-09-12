@@ -8,9 +8,5 @@ namespace DownloadManager.Services;
 
 public interface IFileDownloader
 {
-    public int NumberOfThreads { get; set; }
-
-
-    public Task DownloadFileAsync(string url, string toPath, IProgress<long>? progress = null);
-    
+    public Task DownloadFileAsync(string url, string toPath,int numberOfThreads, IProgress<long>? progress = null);
 }

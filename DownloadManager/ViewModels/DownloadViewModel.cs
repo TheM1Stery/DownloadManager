@@ -124,6 +124,7 @@ public partial class DownloadViewModel : ViewModelBase
         }
         var fileName = headResponse.Content.Headers.ContentDisposition?.FileName ?? 
                        System.IO.Path.GetFileName(Link);
+        fileName = fileName?.Replace("\"", "");
         if (!System.IO.Path.HasExtension(fileName))
         {
             fileName += "." + headResponse.Content.Headers.ContentType?.MediaType?.Split("/")[1];
@@ -134,6 +135,13 @@ public partial class DownloadViewModel : ViewModelBase
         {
             await _dialog.ShowMessageAsync("Size error", "You don't have enough space on this disk");
             return;
+        }
+
+        if (NumberOfThreads > 1 &&(headResponse.Headers.AcceptRanges.Count == 0 
+                                   || headResponse.Headers.AcceptRanges.First() != "bytes"))
+        {
+            await _dialog.ShowMessageAsync("Warning", "This file doesn't support " +
+                                                      "multi-threaded downloading. Only one thread will be used");
         }
         Downloads.Add(_factory.Create<DownloadableItemViewModel>());
         WeakReferenceMessenger.Default.Send(new DownloadItemMessage((new DownloadableItem()

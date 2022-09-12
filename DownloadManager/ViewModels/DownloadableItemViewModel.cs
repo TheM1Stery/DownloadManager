@@ -51,7 +51,7 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
     public async void Receive(DownloadItemMessage message)
     {
         DownloadableItem = message.Value.Item1;
-        _downloader.NumberOfThreads = message.Value.Item2;
+        var numberOfThreads = message.Value.Item2;
         WeakReferenceMessenger.Default.Unregister<DownloadItemMessage>(this);
         if (_downloadableItem.LinkToDownload is null || _downloadableItem.InstalledPath is null) 
             return;
@@ -60,7 +60,7 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
         try
         {
             await _downloader.DownloadFileAsync(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath, 
-                progress);
+                numberOfThreads,progress);
             DownloadStatus = "Success";
             StatusBrush = Brushes.Green;
             IsStatusMessageVisible = true;
