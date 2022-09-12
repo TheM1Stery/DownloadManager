@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -30,6 +31,9 @@ public class SampleAppSplashScreen : IApplicationSplashScreen
     
     void IApplicationSplashScreen.RunTasks()
     {
-
+        if (!File.Exists("downloaddb.sqlite"))
+        {
+            File.Create("downloaddb.sqlite");
+        }
     }
 }

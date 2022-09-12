@@ -1,10 +1,12 @@
 using System;
+using System.Data.Common;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using DownloadManager.Services;
 using DownloadManager.ViewModels;
 using DownloadManager.Views;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DownloadManager
@@ -52,6 +54,10 @@ namespace DownloadManager
                 .AddTransient<IFileDownloader, FileDownloader>()
                 .AddSingleton<IHttpHeadRequester, HttpHeadRequester>()
                 .AddSingleton<IDialog, Dialog>()
+                .AddSingleton<DbProviderFactory>(SqliteFactory.Instance)
+                .AddSingleton<IDownloadDbClient>(provider => new DownloadDbClient(
+                    provider.GetRequiredService<DbProviderFactory>(), 
+                    "Data Source=downloaddb.sqlite"))
                 .BuildServiceProvider();
         }
     }

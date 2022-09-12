@@ -1,9 +1,13 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia.Collections;
+using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -20,8 +24,12 @@ public partial class DownloadViewModel : ViewModelBase
     private readonly IViewModelFactory _factory;
     private readonly IHttpHeadRequester _headRequester;
     private readonly IDialog _dialog;
-    public ObservableCollection<DownloadableItemViewModel> Downloads { get; } = new();
+    private readonly IDownloadDbClient _dbClient;
 
+
+    [ObservableProperty]
+    private ObservableCollection<DownloadableItemViewModel> _downloads = new();
+    
     public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 6));
 
     public ObservableCollection<string> Tags { get; } = new();
@@ -41,14 +49,29 @@ public partial class DownloadViewModel : ViewModelBase
     public bool CanExecuteDownload =>
         !string.IsNullOrWhiteSpace(Link) && !string.IsNullOrWhiteSpace(Path) && Tags.Count != 0;
 
+    private int count = 0;
+    
     public DownloadViewModel(IFolderPicker folderPicker, IViewModelFactory factory, 
-        IHttpHeadRequester headRequester, IDialog dialog)
+        IHttpHeadRequester headRequester, IDialog dialog, IDownloadDbClient dbClient)
     {
         _folderPicker = folderPicker;
         _factory = factory;
         _headRequester = headRequester;
         _dialog = dialog;
+        _dbClient = dbClient;
         Tags.CollectionChanged += TagsOnCollectionChanged;
+        Task.Run( async () =>
+        {
+            await _dbClient.InitializeAsync();
+            // await Populate();
+        });
+        _dbClient.GetAllDownloads();
+        Downloads.CollectionChanged += DownloadsOnCollectionChanged;
+    }
+
+    private void DownloadsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        count++;
     }
 
     private void TagsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -67,6 +90,38 @@ public partial class DownloadViewModel : ViewModelBase
         }
         Path = path;
     }
+    
+    // private async Task Populate()
+    // {
+    //     var downloadableItems = await _dbClient.GetAllDownloadsAsync();
+    //     var items = downloadableItems.Select(x =>
+    //     {
+    //         var vm = _factory.Create<DownloadableItemViewModel>();
+    //         vm.DownloadableItem = x;
+    //         vm.Maximum = 100;
+    //         vm.Progress = 100;
+    //         switch (x.IsFinished)
+    //         {
+    //             case true:
+    //                 vm.DownloadStatus = "Success";
+    //                 vm.DownloadableItem.IsFinished = true;
+    //                 vm.StatusBrush = Brushes.Green;
+    //                 vm.IsStatusMessageVisible = true;
+    //                 break;
+    //             case false:
+    //                 vm.DownloadStatus = "Error! Couldn't download the file";
+    //                 vm.StatusBrush = Brushes.Red;
+    //                 vm.IsStatusMessageVisible = true;
+    //                 vm.DownloadableItem.IsFinished = false;
+    //                 break;
+    //         }
+    //         return vm;
+    //     });
+    //     foreach (var downloadableItemViewModel in items)
+    //     {
+    //         Downloads.Add(downloadableItemViewModel);
+    //     }
+    // }
 
     [RelayCommand]
     private async Task AddTagAsync()
@@ -90,6 +145,7 @@ public partial class DownloadViewModel : ViewModelBase
     private void DeleteItemFromDownloads(DownloadableItemViewModel itemViewModel)
     {
         Downloads.Remove(itemViewModel);
+        _dbClient.RemoveDownloadAsync(itemViewModel.DownloadableItem);
     }
 
     [RelayCommand]
@@ -136,22 +192,24 @@ public partial class DownloadViewModel : ViewModelBase
             await _dialog.ShowMessageAsync("Size error", "You don't have enough space on this disk");
             return;
         }
-
         if (NumberOfThreads > 1 &&(headResponse.Headers.AcceptRanges.Count == 0 
                                    || headResponse.Headers.AcceptRanges.First() != "bytes"))
         {
             await _dialog.ShowMessageAsync("Warning", "This file doesn't support " +
                                                       "multi-threaded downloading. Only one thread will be used");
         }
-        Downloads.Add(_factory.Create<DownloadableItemViewModel>());
-        WeakReferenceMessenger.Default.Send(new DownloadItemMessage((new DownloadableItem()
+        var downloadItem = new DownloadableItem
         {
             Name = fileName,
             Size = fileLength,
             InstalledPath = Path,
             LinkToDownload = Link,
-            Tags = Tags.ToList()
-        }, _numberOfThreads)));
+            Tags = Tags.Select(x => new Tag{Name = x}).ToList()
+        };
+        Downloads.Add(_factory.Create<DownloadableItemViewModel>());
+        await _dbClient.AddDownloadAsync(downloadItem);
+        downloadItem = await _dbClient.GetLatestDownload();
+        WeakReferenceMessenger.Default.Send(new DownloadItemMessage((downloadItem, _numberOfThreads)));
         ResetOptions();
     }
 }

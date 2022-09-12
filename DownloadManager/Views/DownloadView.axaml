@@ -17,8 +17,13 @@
                                  Command="{Binding DeleteItemFromDownloadsCommand}"/>
     </UserControl.Resources>
     <Grid ColumnDefinitions="*, 0.3*" RowDefinitions="*, *">
-       <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Items="{Binding Downloads}" Margin="5">
-           <ListBox.Styles>
+        <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Items="{Binding Downloads}" Margin="5">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.Styles>
                <Style Selector="ProgressBar">
                    <Setter Property="Transitions">
                        <Transitions>

@@ -14,6 +14,7 @@ namespace DownloadManager.ViewModels;
 public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<DownloadItemMessage>
 {
     private readonly IFileDownloader _downloader;
+    private readonly IDownloadDbClient _dbClient;
 
     [ObservableProperty] 
     private DownloadableItem _downloadableItem = null!;
@@ -21,8 +22,7 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
 
     [ObservableProperty]
     private long _progress;
-
-
+    
     [ObservableProperty]
     private long? _maximum;
 
@@ -35,9 +35,10 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
     [ObservableProperty]
     private bool? _isStatusMessageVisible;
     
-    public DownloadableItemViewModel(IFileDownloader downloader)
+    public DownloadableItemViewModel(IFileDownloader downloader, IDownloadDbClient dbClient)
     {
         _downloader = downloader;
+        _dbClient = dbClient;
         WeakReferenceMessenger.Default.Register(this);
     }
     
@@ -62,6 +63,7 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
             await _downloader.DownloadFileAsync(_downloadableItem.LinkToDownload, _downloadableItem.InstalledPath, 
                 numberOfThreads,progress);
             DownloadStatus = "Success";
+            DownloadableItem.IsFinished = true;
             StatusBrush = Brushes.Green;
             IsStatusMessageVisible = true;
         }
@@ -70,8 +72,9 @@ public partial class DownloadableItemViewModel : ViewModelBase, IRecipient<Downl
             DownloadStatus = "Error! Couldn't download the file";
             StatusBrush = Brushes.Red;
             IsStatusMessageVisible = true;
+            DownloadableItem.IsFinished = false;
         }
-
+        await _dbClient.EditDownloadAsync(_downloadableItem);
     }
 
     private void OnProgressReport(long progress)
