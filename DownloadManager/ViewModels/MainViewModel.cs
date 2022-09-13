@@ -47,7 +47,7 @@ public partial class MainViewModel : ViewModelBase
         {
             ContentViewModelType = typeof(FolderViewModel),
             Header = "File storage",
-            Icon = Symbol.FolderLink
+            Icon = Symbol.FolderFilled
         });
         FooterPages.Add(new NavMenuItem
         {

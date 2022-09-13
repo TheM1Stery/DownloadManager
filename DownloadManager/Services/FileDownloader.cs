@@ -33,14 +33,26 @@ public class FileDownloader : IFileDownloader
         {
             filename += "." + head.Content.Headers.ContentType?.MediaType?.Split("/")[1];
         }
-        var createdStream = File.Create(toPath + $@"\{filename}");
+        var filenameInitial = filename;
+        var filenameCurrent = filenameInitial;
+        var count = 0;
+        while (File.Exists(toPath + $@"\{filenameCurrent}"))
+        {
+            count++;
+            filenameCurrent = Path.GetDirectoryName(toPath + $@"\{filenameInitial}")
+                              + Path.DirectorySeparatorChar
+                              + Path.GetFileNameWithoutExtension(toPath + $@"\{filenameInitial}")
+                              + count
+                              + Path.GetExtension(toPath + $@"\{filenameInitial}");
+        }
+        var createdStream = File.Create(filenameCurrent);
         await createdStream.DisposeAsync();
         var length = head.Content.Headers.ContentLength;
         if (numberOfThreads == 1)
         {
             await using var httpStream = await client.GetStreamAsync(url);
             await using var fStream =
-                new FileStream(toPath + $@"\{filename}", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+                new FileStream(filenameCurrent, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
             await httpStream.CopyToAsync(fStream);
             progress?.Report(length ?? 0);
             return;
@@ -67,7 +79,7 @@ public class FileDownloader : IFileDownloader
                 request.Headers.Range = new RangeHeaderValue(tempStart, tempEnd);
                 using var response = await httpClient.SendAsync(request);
                 await using var stream = await response.Content.ReadAsStreamAsync();
-                await using var fileStream = new FileStream(toPath + $@"\{filename}", new FileStreamOptions
+                await using var fileStream = new FileStream(filenameCurrent, new FileStreamOptions
                 {
                     Share = FileShare.Write,
                     Access = FileAccess.Write,

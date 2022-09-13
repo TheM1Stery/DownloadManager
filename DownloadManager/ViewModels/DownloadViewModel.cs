@@ -39,14 +39,14 @@ public partial class DownloadViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DownloadCommand))]
-    private string? _path;
+    private string? _installedPath;
 
     [ObservableProperty]
     private int _numberOfThreads = 1;
     
 
     public bool CanExecuteDownload =>
-        !string.IsNullOrWhiteSpace(Link) && !string.IsNullOrWhiteSpace(Path) && Tags.Count != 0;
+        !string.IsNullOrWhiteSpace(Link) && !string.IsNullOrWhiteSpace(InstalledPath) && Tags.Count != 0;
 
     
     public DownloadViewModel(IFolderPicker folderPicker, IViewModelFactory factory, 
@@ -78,39 +78,7 @@ public partial class DownloadViewModel : ViewModelBase
             await _dialog.ShowMessageAsync("Error", "Error getting path. No path was provided");
             return;
         }
-        Path = path;
-    }
-    
-    private async Task Populate()
-    {
-        var downloadableItems = await _dbClient.GetAllDownloadsAsync();
-        var items = downloadableItems.Select(x =>
-        {
-            var vm = _factory.Create<DownloadableItemViewModel>();
-            vm.DownloadableItem = x;
-            vm.Maximum = 100;
-            vm.Progress = 100;
-            switch (x.IsFinished)
-            {
-                case true:
-                    vm.DownloadStatus = "Success";
-                    vm.DownloadableItem.IsFinished = true;
-                    vm.StatusBrush = Brushes.Green;
-                    vm.IsStatusMessageVisible = true;
-                    break;
-                case false:
-                    vm.DownloadStatus = "Error! Couldn't download the file";
-                    vm.StatusBrush = Brushes.Red;
-                    vm.IsStatusMessageVisible = true;
-                    vm.DownloadableItem.IsFinished = false;
-                    break;
-            }
-            return vm;
-        });
-        foreach (var downloadableItemViewModel in items)
-        {
-            Downloads.Add(downloadableItemViewModel);
-        }
+        InstalledPath = path;
     }
 
     [RelayCommand]
@@ -142,7 +110,7 @@ public partial class DownloadViewModel : ViewModelBase
     private void ResetOptions()
     {
         Tags.Clear();
-        Path = string.Empty;
+        InstalledPath = string.Empty;
         Link = string.Empty;
         NumberOfThreads = 1;
     }
@@ -176,7 +144,7 @@ public partial class DownloadViewModel : ViewModelBase
             fileName += "." + headResponse.Content.Headers.ContentType?.MediaType?.Split("/")[1];
         }
         var fileLength = headResponse.Content.Headers.ContentLength;
-        var driveInfo = new DriveInfo(System.IO.Path.GetPathRoot(Path) ?? string.Empty);
+        var driveInfo = new DriveInfo(System.IO.Path.GetPathRoot(InstalledPath) ?? string.Empty);
         if (driveInfo.AvailableFreeSpace < fileLength)
         {
             await _dialog.ShowMessageAsync("Size error", "You don't have enough space on this disk");
@@ -188,11 +156,23 @@ public partial class DownloadViewModel : ViewModelBase
             await _dialog.ShowMessageAsync("Warning", "This file doesn't support " +
                                                       "multi-threaded downloading. Only one thread will be used");
         }
+        var filenameInitial = InstalledPath;
+        var filenameCurrent = filenameInitial;
+        var count = 0;
+        while (File.Exists(filenameCurrent))
+        {
+            count++;
+            filenameCurrent = Path.GetDirectoryName(filenameInitial)
+                               + Path.DirectorySeparatorChar
+                               + Path.GetFileNameWithoutExtension(filenameInitial)
+                               + count
+                               + Path.GetExtension(filenameInitial);
+        }
         var downloadItem = new DownloadableItem
         {
             Name = fileName,
             Size = fileLength,
-            InstalledPath = Path,
+            InstalledPath = filenameInitial,
             LinkToDownload = Link,
             Tags = Tags.Select(x => new Tag{Name = x}).ToList()
         };

@@ -3,19 +3,55 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:DownloadManager.ViewModels"
+             xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DownloadManager.Views.FolderView"
              x:DataType="viewModels:FolderViewModel"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              x:CompileBindings="True">
     <Grid RowDefinitions="0.2*, 5*, 0.2*">
-        <Grid Grid.Row="0" ColumnDefinitions="2*, 0.3*" HorizontalAlignment="Stretch">
-            <TextBox Grid.Column="0" VerticalAlignment="Top" Margin="5"/>
-            <ComboBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <i:Interaction.Behaviors>
+            <ia:EventTriggerBehavior EventName="Initialized">
+                <ia:InvokeCommandAction Command="{Binding InitializedCommand}"/>
+            </ia:EventTriggerBehavior>
+        </i:Interaction.Behaviors>
+        <Grid Grid.Row="0" ColumnDefinitions="2*, 0.3*, 0.1*" HorizontalAlignment="Stretch">
+            <TextBox Grid.Column="0" VerticalAlignment="Top" Margin="5" Text="{Binding SearchText}"/>
+            <ComboBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Items="{Binding SearchParameters}" 
+                      SelectedItem="{Binding SelectedSearchParameter}"/>
+            <Button Grid.Column="2" Command="{Binding SearchCommand}">
+                <ui:SymbolIcon Symbol="Find"/>
+            </Button>
         </Grid>
-        <ListBox Grid.Row="1">
+        <ListBox Grid.Row="1" Items="{Binding Items}" SelectedItem="{Binding SelectedItem}"
+                 SelectionMode="Single"
+                 Margin="5">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="File name: "/>
+                            <TextBlock Text="{Binding Name}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Tags: "/>
+                            <TextBlock Text="{Binding TagsToString}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="File location: "/>
+                            <TextBlock Text="{Binding InstalledPath}"/>
+                        </StackPanel>
+                    </StackPanel>
+                   
+                </DataTemplate>
+            </ListBox.ItemTemplate>
             <ListBox.ContextFlyout>
                 <MenuFlyout>
-                    
+                    <MenuItem Header="Rename" Command="{Binding RenameCommand}"/>
+                    <MenuItem Header="Move" Command="{Binding MoveCommand}"/>
+                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
                 </MenuFlyout>
             </ListBox.ContextFlyout>
         </ListBox>

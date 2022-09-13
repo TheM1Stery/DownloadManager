@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:viewModels="clr-namespace:DownloadManager.ViewModels"
-             xmlns:models="clr-namespace:DownloadManager.Models"
              xmlns:misc="clr-namespace:DownloadManager.Miscellaneous"
              xmlns:input="clr-namespace:FluentAvalonia.UI.Input;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -82,7 +81,7 @@
                 <TextBox Watermark="Link.." UseFloatingWatermark="True" Text="{Binding Link}" 
                          Margin="5"/>
                 <Grid ColumnDefinitions="1.2*, 0.3*" Margin="5">
-                    <TextBox Grid.Column="0" Watermark="Path to save.." Text="{Binding Path}"
+                    <TextBox Grid.Column="0" Watermark="Path to save.." Text="{Binding InstalledPath}"
                              HorizontalAlignment="Stretch" IsReadOnly="True"/>
                     <Button Grid.Column="1" Command="{Binding SelectPathCommand}" Margin="5"
                             ToolTip.Tip="Select path..">
