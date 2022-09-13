@@ -36,7 +36,8 @@ public class FileDownloader : IFileDownloader
         var filenameInitial = filename;
         var filenameCurrent = filenameInitial;
         var count = 0;
-        while (File.Exists(toPath + $@"\{filenameCurrent}"))
+        var alreadyExists = false;
+        while (File.Exists(filenameCurrent))
         {
             count++;
             filenameCurrent = Path.GetDirectoryName(toPath + $@"\{filenameInitial}")
@@ -44,6 +45,11 @@ public class FileDownloader : IFileDownloader
                               + Path.GetFileNameWithoutExtension(toPath + $@"\{filenameInitial}")
                               + count
                               + Path.GetExtension(toPath + $@"\{filenameInitial}");
+            alreadyExists = true;
+        }
+        if (!alreadyExists)
+        {
+            filenameCurrent = toPath + $@"\{filenameInitial}";
         }
         var createdStream = File.Create(filenameCurrent);
         await createdStream.DisposeAsync();

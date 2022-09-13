@@ -1,13 +1,9 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Avalonia.Collections;
-using Avalonia.Media;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -137,14 +133,14 @@ public partial class DownloadViewModel : ViewModelBase
             return;
         }
         var fileName = headResponse.Content.Headers.ContentDisposition?.FileName ?? 
-                       System.IO.Path.GetFileName(Link);
+                       Path.GetFileName(Link);
         fileName = fileName?.Replace("\"", "");
-        if (!System.IO.Path.HasExtension(fileName))
+        if (!Path.HasExtension(fileName))
         {
             fileName += "." + headResponse.Content.Headers.ContentType?.MediaType?.Split("/")[1];
         }
         var fileLength = headResponse.Content.Headers.ContentLength;
-        var driveInfo = new DriveInfo(System.IO.Path.GetPathRoot(InstalledPath) ?? string.Empty);
+        var driveInfo = new DriveInfo(Path.GetPathRoot(InstalledPath) ?? string.Empty);
         if (driveInfo.AvailableFreeSpace < fileLength)
         {
             await _dialog.ShowMessageAsync("Size error", "You don't have enough space on this disk");
@@ -156,23 +152,23 @@ public partial class DownloadViewModel : ViewModelBase
             await _dialog.ShowMessageAsync("Warning", "This file doesn't support " +
                                                       "multi-threaded downloading. Only one thread will be used");
         }
-        var filenameInitial = InstalledPath;
+        var filenameInitial = fileName;
         var filenameCurrent = filenameInitial;
         var count = 0;
         while (File.Exists(filenameCurrent))
         {
             count++;
-            filenameCurrent = Path.GetDirectoryName(filenameInitial)
-                               + Path.DirectorySeparatorChar
-                               + Path.GetFileNameWithoutExtension(filenameInitial)
-                               + count
-                               + Path.GetExtension(filenameInitial);
+            filenameCurrent = Path.GetDirectoryName(InstalledPath + $@"\{filenameInitial}")
+                              + Path.DirectorySeparatorChar
+                              + Path.GetFileNameWithoutExtension(InstalledPath + $@"\{filenameInitial}")
+                              + count
+                              + Path.GetExtension(InstalledPath + $@"\{filenameInitial}");
         }
         var downloadItem = new DownloadableItem
         {
-            Name = fileName,
+            Name = Path.GetFileName(InstalledPath + $@"\{filenameCurrent}"),
             Size = fileLength,
-            InstalledPath = filenameInitial,
+            InstalledPath = InstalledPath,
             LinkToDownload = Link,
             Tags = Tags.Select(x => new Tag{Name = x}).ToList()
         };

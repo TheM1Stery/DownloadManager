@@ -93,11 +93,12 @@ public partial class FolderViewModel : ViewModelBase
             await _dialog.ShowMessageAsync("Error", "There was no path provided");
             return;
         }
-        newPath += newPath + $@"\{SelectedItem.Name}";
+        newPath += $@"\{SelectedItem.Name}";
+        var oldPath = SelectedItem.InstalledPath + $@"\{SelectedItem.Name}";
         try
         {
-            File.Move(SelectedItem.InstalledPath + $@"\{SelectedItem.Name}", newPath);
-            SelectedItem.InstalledPath = newPath;
+            File.Move(oldPath, newPath);
+            SelectedItem.InstalledPath = Path.GetDirectoryName(newPath);
             await _dbClient.EditDownloadAsync(SelectedItem);
         }
         catch (IOException)
@@ -126,13 +127,13 @@ public partial class FolderViewModel : ViewModelBase
         try
         {
             File.Move(SelectedItem.InstalledPath + $@"\{SelectedItem.Name}", newDirectory);
+            SelectedItem.Name = Path.GetFileName(newDirectory);
+            await _dbClient.EditDownloadAsync(SelectedItem);
         }
         catch (Exception)
         {
             await _dialog.ShowMessageAsync("Error", "There was something wrong while renaming the file");
         }
-        SelectedItem.InstalledPath = newDirectory;
-        SelectedItem.Name = Path.GetFileName(newDirectory);
-        await _dbClient.EditDownloadAsync(SelectedItem);
+        
     }
 }
