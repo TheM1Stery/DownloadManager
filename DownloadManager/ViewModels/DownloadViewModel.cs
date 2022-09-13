@@ -26,9 +26,8 @@ public partial class DownloadViewModel : ViewModelBase
     private readonly IDialog _dialog;
     private readonly IDownloadDbClient _dbClient;
 
-
-    [ObservableProperty]
-    private ObservableCollection<DownloadableItemViewModel> _downloads = new();
+    
+    public ObservableCollection<DownloadableItemViewModel> Downloads { get; } = new();
     
     public ObservableCollection<int> ThreadNumbers { get; } = new(Enumerable.Range(1, 6));
 
@@ -49,7 +48,6 @@ public partial class DownloadViewModel : ViewModelBase
     public bool CanExecuteDownload =>
         !string.IsNullOrWhiteSpace(Link) && !string.IsNullOrWhiteSpace(Path) && Tags.Count != 0;
 
-    private int count = 0;
     
     public DownloadViewModel(IFolderPicker folderPicker, IViewModelFactory factory, 
         IHttpHeadRequester headRequester, IDialog dialog, IDownloadDbClient dbClient)
@@ -63,17 +61,9 @@ public partial class DownloadViewModel : ViewModelBase
         Task.Run( async () =>
         {
             await _dbClient.InitializeAsync();
-            // await Populate();
         });
-        _dbClient.GetAllDownloads();
-        Downloads.CollectionChanged += DownloadsOnCollectionChanged;
     }
-
-    private void DownloadsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        count++;
-    }
-
+    
     private void TagsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         DownloadCommand.NotifyCanExecuteChanged();
@@ -91,37 +81,37 @@ public partial class DownloadViewModel : ViewModelBase
         Path = path;
     }
     
-    // private async Task Populate()
-    // {
-    //     var downloadableItems = await _dbClient.GetAllDownloadsAsync();
-    //     var items = downloadableItems.Select(x =>
-    //     {
-    //         var vm = _factory.Create<DownloadableItemViewModel>();
-    //         vm.DownloadableItem = x;
-    //         vm.Maximum = 100;
-    //         vm.Progress = 100;
-    //         switch (x.IsFinished)
-    //         {
-    //             case true:
-    //                 vm.DownloadStatus = "Success";
-    //                 vm.DownloadableItem.IsFinished = true;
-    //                 vm.StatusBrush = Brushes.Green;
-    //                 vm.IsStatusMessageVisible = true;
-    //                 break;
-    //             case false:
-    //                 vm.DownloadStatus = "Error! Couldn't download the file";
-    //                 vm.StatusBrush = Brushes.Red;
-    //                 vm.IsStatusMessageVisible = true;
-    //                 vm.DownloadableItem.IsFinished = false;
-    //                 break;
-    //         }
-    //         return vm;
-    //     });
-    //     foreach (var downloadableItemViewModel in items)
-    //     {
-    //         Downloads.Add(downloadableItemViewModel);
-    //     }
-    // }
+    private async Task Populate()
+    {
+        var downloadableItems = await _dbClient.GetAllDownloadsAsync();
+        var items = downloadableItems.Select(x =>
+        {
+            var vm = _factory.Create<DownloadableItemViewModel>();
+            vm.DownloadableItem = x;
+            vm.Maximum = 100;
+            vm.Progress = 100;
+            switch (x.IsFinished)
+            {
+                case true:
+                    vm.DownloadStatus = "Success";
+                    vm.DownloadableItem.IsFinished = true;
+                    vm.StatusBrush = Brushes.Green;
+                    vm.IsStatusMessageVisible = true;
+                    break;
+                case false:
+                    vm.DownloadStatus = "Error! Couldn't download the file";
+                    vm.StatusBrush = Brushes.Red;
+                    vm.IsStatusMessageVisible = true;
+                    vm.DownloadableItem.IsFinished = false;
+                    break;
+            }
+            return vm;
+        });
+        foreach (var downloadableItemViewModel in items)
+        {
+            Downloads.Add(downloadableItemViewModel);
+        }
+    }
 
     [RelayCommand]
     private async Task AddTagAsync()

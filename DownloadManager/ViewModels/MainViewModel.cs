@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DownloadManager.Models;
 using DownloadManager.Services;
@@ -40,6 +41,13 @@ public partial class MainViewModel : ViewModelBase
             ContentViewModelType = typeof(DownloadViewModel),
             Header = "Download list",
             Icon = Symbol.Download
+        });
+        SelectedMenuItem = Pages[0];
+        Pages.Add(new NavMenuItem
+        {
+            ContentViewModelType = typeof(FolderViewModel),
+            Header = "File storage",
+            Icon = Symbol.FolderLink
         });
         FooterPages.Add(new NavMenuItem
         {

@@ -50,6 +50,7 @@ namespace DownloadManager
                 .AddSingleton<SettingsViewModel>()
                 .AddTransient<DownloadableItemViewModel>()
                 .AddTransient<AddTagViewModel>()
+                .AddSingleton<FolderViewModel>()
                 .AddSingleton<IFolderPicker, FolderPicker>()
                 .AddTransient<IFileDownloader, FileDownloader>()
                 .AddSingleton<IHttpHeadRequester, HttpHeadRequester>()

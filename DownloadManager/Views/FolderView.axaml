@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:DownloadManager.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DownloadManager.Views.FolderView"
+             x:DataType="viewModels:FolderViewModel"
+             x:CompileBindings="True">
+    <Grid RowDefinitions="0.2*, 5*, 0.2*">
+        <Grid Grid.Row="0" ColumnDefinitions="2*, 0.3*" HorizontalAlignment="Stretch">
+            <TextBox Grid.Column="0" VerticalAlignment="Top" Margin="5"/>
+            <ComboBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </Grid>
+        <ListBox Grid.Row="1">
+            <ListBox.ContextFlyout>
+                <MenuFlyout>
+                    
+                </MenuFlyout>
+            </ListBox.ContextFlyout>
+        </ListBox>
+    </Grid>
+</UserControl>
