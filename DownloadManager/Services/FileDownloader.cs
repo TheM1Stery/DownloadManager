@@ -37,13 +37,13 @@ public class FileDownloader : IFileDownloader
         var filenameCurrent = filenameInitial;
         var count = 0;
         var alreadyExists = false;
-        while (File.Exists(filenameCurrent))
+        while (File.Exists(alreadyExists ? filenameCurrent : toPath + $@"\{filenameCurrent}"))
         {
             count++;
             filenameCurrent = Path.GetDirectoryName(toPath + $@"\{filenameInitial}")
                               + Path.DirectorySeparatorChar
                               + Path.GetFileNameWithoutExtension(toPath + $@"\{filenameInitial}")
-                              + count
+                              + $"({count})"
                               + Path.GetExtension(toPath + $@"\{filenameInitial}");
             alreadyExists = true;
         }

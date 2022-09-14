@@ -155,14 +155,16 @@ public partial class DownloadViewModel : ViewModelBase
         var filenameInitial = fileName;
         var filenameCurrent = filenameInitial;
         var count = 0;
-        while (File.Exists(filenameCurrent))
+        var alreadyExists = false;
+        while (File.Exists(alreadyExists ? filenameCurrent : InstalledPath + $@"\{filenameCurrent}"))
         {
             count++;
             filenameCurrent = Path.GetDirectoryName(InstalledPath + $@"\{filenameInitial}")
                               + Path.DirectorySeparatorChar
                               + Path.GetFileNameWithoutExtension(InstalledPath + $@"\{filenameInitial}")
-                              + count
+                              + $"({count})"
                               + Path.GetExtension(InstalledPath + $@"\{filenameInitial}");
+            alreadyExists = true;
         }
         var downloadItem = new DownloadableItem
         {
